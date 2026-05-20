@@ -58,7 +58,7 @@ class OllamaClient:
 
 
 # Load image
-#with open(".../image-testing-framework/test_images/testImage.png", "rb") as f:
+#with open(".../image-testing-framework/test_images/ghibli.png", "rb") as f:
  #   image_b64 = base64.b64encode(f.read()).decode("utf-8")
 
 # Create one client

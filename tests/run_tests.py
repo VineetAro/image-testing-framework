@@ -10,7 +10,7 @@ from pathlib import Path
 import test_suites
 from tests import baselines
 
-test_cases = test_suites.CORE_VISION_TEST_CASES
+test_cases = test_suites.CORE_VISION_TEST_CASES_ANIMALS
 baselines = baselines.HISTORIC_BASELINES
 
 def run_tests():
