@@ -20,24 +20,43 @@ Self-Compiling Reports: Automatically formats and outputs run summaries directly
 
 image-testing-framework/
 │
+
 ├── test_images/                 # Local image asset storage (.png, .jpg)
-│   ├── cat.jpg
-│   └── testImage.png
+
+│   	├── cat.jpg
+
+│   	└── testImage.png
+
 │
+
 ├── framework/                   # Core Framework Package
-│   ├── __init__.py              # Package initialization marker
-│   ├── client.py                # Ollama API Client wrapper
-│   ├── image_loader.py          # Dynamic image loader & compressor
-│   ├── validator.py             # Evaluation, scoring & regression logic
-│   └── reporter.py              # Self-compiling Markdown reporter
+
+│   	├── __init__.py              # Package initialization marker
+
+│   	├── client.py                # Ollama API Client wrapper
+
+│   	├── image_loader.py          # Dynamic image loader & compressor
+
+│   	├── validator.py             # Evaluation, scoring & regression logic
+
+│   	└── reporter.py              # Self-compiling Markdown reporter
+
 │
+
 ├── tests/                       # Test Definitions & Run Controls
-│   ├── baselines.py             # Historic SLA & expected test statuses
-│   ├── test_suites.py           # Decoupled test datasets
-│   └── run_tests.py             # Main test execution loop
+
+│   	├── baselines.py             # Historic SLA & expected test statuses
+
+│   	├── test_suites.py           # Decoupled test datasets
+
+│   	└── run_tests.py             # Main test execution loop
+
 │
+
 ├── .gitignore                   # Active directory exclusions for Git
+
 └── README.md                    # Project documentation
+
 
 
 🛠️ Installation & Execution
