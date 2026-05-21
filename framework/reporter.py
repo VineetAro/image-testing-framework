@@ -1,10 +1,13 @@
 from pathlib import Path
 
+from config import settings
+
+
 class TestReporter:
 
     def __init__(self):
         self.results = []
-        self.report_path = Path(__file__).resolve().parent.parent / "test_report.md"
+        self.report_path = settings.REPORT_PATH
 
     def record_result(self, test_name, total_time : float , status, image_name, details, regression_warning):
         """

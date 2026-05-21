@@ -1,112 +1,214 @@
 👁️ VLM Automated Testing & Performance Benchmarking Framework
 
-An automated, local regression and SLA benchmarking suite designed for Vision-Language Models (VLMs) running on local host environments (powered by Ollama).
+An automated, local regression and SLA benchmarking suite designed for Vision-Language Models (VLMs) running on localhost environments (powered by Ollama).
 
 This framework automates the validation of local visual models (such as llava:7b), scoring their output descriptions, auditing confidence scores, logging inference latency, and running historical regression checks before deploying updates to production.
 
-🚀 Key Features
 
-Decoupled Test Suite: Test definitions are decoupled from code execution inside test_suites.py, making it easy for QA teams to scale tests without modifying core logic.
+🚀 Architectural Evolution: Inversion of Control (IoC)
 
-Dynamic Portability: Completely relative pathing resolves files automatically depending on where the script is run—zero hardcoded machine paths.
+Previously, this framework relied on a monolithic, imperative script-runner (run_tests.py) that manually managed test loops, error handling, and state compilation.
 
-Inference Latency Metrics: Tracks and reports inference speed (execution duration) down to the millisecond.
+The framework has been fully refactored to an Aspect-Oriented Pytest Architecture. By deferring execution and test state management to the Pytest native engine, we achieved strict Separation of Concerns:
 
-Historical Regression Warnings: Automated system checks compare live execution stats against a baseline configuration (baselines.py) to flag speed and accuracy regressions.
+    Declarative Test Files: Test scripts no longer contain try/except loops, file saving logic, or manual recording steps. They focus exclusively on input parameters and assertions.
 
-Self-Compiling Reports: Automatically formats and outputs run summaries directly to a clean, human-readable Markdown file (test_report.md).
+    Dependency Injection (Fixtures): The OllamaClient connection lifecycle is abstracted out of test files. Handled via session-scoped singletons in conftest.py, network connections are instantiated exactly once per test run rather than inside an iterative loop.
 
-📁 Project Directory Structure
+    Out-of-Band Instrumentation (Hooks): System metric tracking, latency profiling, traceback capturing, and Markdown report synthesis are handled globally behind the scenes via Pytest engine lifecycles (pytest_runtest_makereport).
 
+
+🚀 "Built as a self-learning project to explore modern AI-assisted testing concepts using local multimodal models such as `llava:7b`. 🚀
+
+---
+
+# 🚀 Key Features
+
+* Local AI model testing using Ollama
+* Automated image inference validation
+* Keyword-based response verification
+* Confidence score threshold checks
+* Inference latency tracking
+* Modular framework architecture
+* Reusable validation utilities
+* Dynamic image loading and preprocessing
+* Structured Markdown reporting
+* Pytest-based execution support
+
+---
+
+# 🏗️ Framework Architecture
+
+The framework follows a modular layered design to separate responsibilities cleanly across configuration, API communication, validation logic, reporting, and automated test execution.
+
+Key architectural concepts explored:
+
+* Separation of Concerns
+* Reusable framework utilities
+* Centralized configuration management
+* Declarative test design using Pytest
+* Lightweight dependency injection via fixtures
+* Automated report generation
+* Local AI model validation workflows
+
+---
+
+# 📁 Project Directory Structure
+
+```text
 image-testing-framework/
 │
-
-├── test_images/                 # Local image asset storage (.png, .jpg)
-
-│   	├── cat.jpg
-
-│   	└── testImage.png
-
+├── config/                      # Framework Parameters
+│   └── settings.py              # URLs, thresholds, and execution configs
 │
-
-├── framework/                   # Core Framework Package
-
-│   	├── __init__.py              # Package initialization marker
-
-│   	├── client.py                # Ollama API Client wrapper
-
-│   	├── image_loader.py          # Dynamic image loader & compressor
-
-│   	├── validator.py             # Evaluation, scoring & regression logic
-
-│   	└── reporter.py              # Self-compiling Markdown reporter
-
+├── test_images/                 # Local image asset repository
+│   ├── cat.jpg
+│   ├── dog.jpg
+│   ├── ghibli.png
+│   └── running_fire_hydrant.png
 │
-
-├── tests/                       # Test Definitions & Run Controls
-
-│   	├── baselines.py             # Historic SLA & expected test statuses
-
-│   	├── test_suites.py           # Decoupled test datasets
-
-│   	└── run_tests.py             # Main test execution loop
-
+├── framework/                   # Core Framework Logic
+│   ├── __init__.py
+│   ├── client.py                # Ollama API communication layer
+│   ├── image_loader.py          # Image loading & Base64 conversion
+│   ├── validator.py             # Keyword & confidence validation
+│   └── reporter.py              # Markdown report generation
 │
+├── tests/                       # Automated Test Layer
+│   ├── conftest.py              # Fixtures & test lifecycle hooks
+│   ├── test_suites.py           # Centralized test datasets
+│   └── test_vision.py           # Vision model test cases
+│
+├── .gitignore
+└── README.md
+```
 
-├── .gitignore                   # Active directory exclusions for Git
+---
 
-└── README.md                    # Project documentation
+# 🛠️ Installation
 
+## Prerequisites
 
+* Python 3.10+
+* Ollama installed locally
 
-🛠️ Installation & Execution
+Install Ollama:
 
-Prerequisites
-
-Python 3.10+
-
-Ollama installed and running with your target model:
-
+```bash
 ollama run llava:7b
+```
 
+---
 
-1. Initialize and Setup
+# 📦 Setup
 
-git clone [https://github.com/your-username/image-testing-framework.git](https://github.com/your-username/image-testing-framework.git)
+Clone the repository:
+
+```bash
+git clone https://github.com/your-username/image-testing-framework.git
+
 cd image-testing-framework
-pip install pillow requests
+```
 
+Install dependencies:
 
-2. Run the Suite
+```bash
+pip install pillow requests pytest
+```
 
-Execute the runner module:
+---
 
-python -m tests.run_tests
+# ▶️ Running Tests
 
+Execute the Pytest suite:
 
-📊 Sample Output (Auto-Generated test_report.md)
+```bash
+pytest -v -s
+```
 
-After a successful run, the framework compiles an execution report showing stats and historical comparisons:
+Or execute specific test modules:
 
+```bash
+pytest tests/test_vision.py -v -s
+```
+
+---
+
+# 📊 Sample Report Output
+
+```markdown
 # VLM Test Execution Report
-This report was automatically generated by the testing framework.
 
 ## Summary
-- **Total Tests Run:** 2
-- **Passed:** ✅ 2
-- **Failed:** ❌ 0
-- **Average Speed (Passed Tests):** 8.43 seconds
+
+- Total Tests Run: 3
+- Passed: 3
+- Failed: 0
 
 ---
 
 ## Test Details
+
 ### ✅ Cat Detection - PASS
-- **Total Time:** 7.12 seconds
-- **Image:** `cat.jpg`
-- **Details:** Model matched expected keywords and passed confidence thresholds.
+- Total Time: 179.63 Seconds
+- Image: cat.jpg
+- Details: Passed confidence and keyword thresholds.
 
 ### ✅ Dog Detection - PASS
-- **Total Time:** 9.74 seconds
-- **Image:** `dog.jpg`
-- **Details:** Model matched expected keywords and passed confidence thresholds.
-- **⚠️ REGRESSION WARNING:** SLA Warning: Speed regressed to 9.74s (Max allowed: 5.0s)
+- Total Time: 217.82 Seconds
+- Image: dog.jpg
+- Details: Passed confidence and keyword thresholds.
+
+### ✅ Image Detection - PASS
+- Total Time: 158.02 Seconds
+- Image: running_fire_hydrant.png
+- Details: Passed confidence and keyword thresholds.
+```
+
+---
+
+# 🧠 Concepts Explored
+
+This project explores practical concepts related to:
+
+* AI-assisted testing
+* Vision-language model validation
+* Prompt engineering
+* API testing
+* Modular framework design
+* Local LLM workflows
+* Response parsing and validation
+* Automated reporting
+* Pytest fixtures and hooks
+
+---
+
+# ⚠️ Current Limitations
+
+* CPU-only inference can result in high response latency
+* Validation is keyword-based and not semantic-aware
+* Confidence scoring depends on model-generated outputs
+* Local model quality varies by hardware capability
+
+---
+
+# 🔮 Future Improvements
+
+* Async HTTP support using httpx
+* Semantic similarity validation
+* Historical trend tracking
+* JSON schema enforcement
+* GPU acceleration benchmarking
+* CI/CD integration
+* Multi-model comparison support
+* Automated HTML reporting
+
+
+---
+
+# 👨‍💻 Author
+
+Vineet Arora
+
+QA Engineer transitioning into AI-assisted testing, automation framework development, and local LLM validation workflows.
+0s)

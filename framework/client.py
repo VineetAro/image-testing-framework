@@ -1,15 +1,19 @@
 import base64
+from urllib.parse import urljoin
+
 import requests
 import os
 import pathlib
 import re
 import json
+from config import settings
+
 
 
 class OllamaClient:
     def __init__(self, model:str):
-        self.base_url = "http://localhost:11434/api/generate"
-        self.model = model
+        self.base_url = settings.OLLAMA_API_BASE_URL
+        self.model = settings.VLM_MODEL_NAME
 
     def get_model(self):
         return self.model
@@ -23,13 +27,17 @@ class OllamaClient:
                 'Return ONLY valid JSON in this exact format:\n'
                 '{"Description": "", "Probability": 0.0}'),
             "images": [image],
-            "stream": False
+            "stream": False,          # False = wait for complete response
+            "options": {
+                "temperature": 0.1    # low = consistent responses
+            }
         }
 
         try:
-            response = requests.post(self.base_url,
+            full_url = urljoin(self.base_url, settings.ENDPOINT_GENERATE)
+            response = requests.post(full_url,
                                      json=payload,
-                                     timeout=200)
+                                     timeout=300)
             response.raise_for_status()
             raw_data = response.json()
             # Extract the raw response string

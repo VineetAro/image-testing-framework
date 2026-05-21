@@ -48,6 +48,23 @@ class ImageLoader:
         full_path = os.path.join(self.image_dir, filename)
         img = Image.open(full_path)
 
+        # inspect image channels like RGBA and LA
+
+        if img.mode in ("LA", "RGBA") or (img.mode == 'P' and 'transparency' in img.info):
+            # Create a solid white canvas layer matching identical dimensions
+            background = Image.new("RGB", img.size, (255, 255, 255))
+
+            # If the image uses an indexed palette (P), upgrade it to RGBA to read its alpha transparency mask
+            if img.mode == 'P':
+                img = img.convert('RGBA')
+
+            # Paste the asset onto the white backdrop, using the image itself as its own transparency mask
+            background.paste(img, (0, 0), img)
+            img = background
+        else:
+            # If it's already an opaque format, guarantee standard 3-channel RGB mode for JPEG safety
+            img = img.convert("RGB")
+
         # Split the path cleanly using the Path object attributes
 
         name, ext = os.path.splitext(filename)
@@ -59,7 +76,7 @@ class ImageLoader:
         if ext.upper == "PNG":
             img.save(output_image, "PNG", optimize=True)
         else:
-            img.save(output_image, ext.upper, optimize=True, quality=20)
+            img.save(output_image, optimize=True, quality=20,  format="JPEG")
         print()
         return output_image
 
