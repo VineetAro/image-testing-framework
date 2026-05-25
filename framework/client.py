@@ -25,7 +25,7 @@ class OllamaClient:
             "prompt": (
                 f"{question}\n\n"
                 'Return ONLY valid JSON in this exact format:\n'
-                '{"Description": "", "Probability": 0.0}'),
+                '{"Description": "", "Probability": 1.0}'),
             "images": [image],
             "stream": False,          # False = wait for complete response
             "options": {
@@ -62,6 +62,49 @@ class OllamaClient:
             print(f"ERROR: Unexpected error: {e}")
             return None
 
+    def call_text_model(self, question: str) -> dict:
+        # print("Granite Launched")
+        payload = {
+            "model": self.model,  # Use the stored model name
+            "prompt": (
+
+                f"{question}\n\n"
+                'Return ONLY valid JSON in this exact format:\n'
+                '{"Description": "", "Probability": 1.0}'),
+            "stream": False,  # False = wait for complete response
+            "options": {
+                "temperature": 0.1  # low = consistent responses
+            }
+        }
+
+        try:
+            full_url = urljoin(self.base_url, settings.ENDPOINT_GENERATE)
+            response = requests.post(full_url,
+                                     json=payload,
+                                     timeout=300)
+            response.raise_for_status()
+            raw_data = response.json()
+            # Extract the raw response string
+            raw_text = raw_data.get("response", "")
+
+            # Clean up potential Markdown formatting
+            cleaned_text = re.sub(r'```json|```', '', raw_text).strip()
+
+            # Parse into a dictionary
+            return json.loads(cleaned_text)
+
+        except requests.exceptions.Timeout:
+            print("ERROR: Request timed out.")
+            print("FIX: Model may still be loading. Wait 30s and try again.")
+            return None
+
+        except requests.exceptions.HTTPError as e:
+            print(f"ERROR: API returned error: {e}")
+            return None
+
+        except Exception as e:
+            print(f"ERROR: Unexpected error: {e}")
+            return None
 
 
 

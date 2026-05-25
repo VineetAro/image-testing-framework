@@ -4,12 +4,23 @@ from framework.client import OllamaClient
 from config import settings
 
 
+@pytest.fixture(scope="function")  # Changed to function scope to re-evaluate per test case
+def vlm_client(request):
+    """
+    Dynamically routes to the correct Ollama model based on the test case parameters.
+    """
+    # Check if 'image_file' is in the test's parametrized arguments
+    if hasattr(request, "callspec") and "image_file" in request.callspec.params:
+        # It's a vision test case
+        model_name = settings.VLM_MODEL_IMAGE
+    else:
+        # It's a pure text test case
+        # Fallback to text model if defined in settings, otherwise reuse VLM
+        model_name = settings.VLM_MODEL_TEXT
 
-@pytest.fixture(scope="session")
-def vlm_client():
-    # Instantiating the client exactly as you had it in your code
-    client = OllamaClient(model=settings.VLM_MODEL_NAME)
-    yield  client
+    # Instantiate the client with the dynamically selected model
+    client = OllamaClient(model=model_name)
+    yield client
 
 @pytest.fixture(scope="session", autouse=True)
 def reporter_manager():
@@ -32,7 +43,7 @@ def pytest_runtest_makereport(item, call):
 
     # We only care about the actual execution phase ("call")
     if report.when == "call":
-        test_name = item.name
+        test_name = item.nodeid  # Returns: "tests/text_test.py::TestTextModels::test_problem_detection[0]"
         duration = report.duration
 
         # Pull parameters dynamically out of Pytest's internal memory

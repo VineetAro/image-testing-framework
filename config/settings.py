@@ -16,7 +16,8 @@ REPORT_PATH= REPORT_DIR /"report.md"
 # VLM MODEL CONFIGURATION
 # =====================================================================
 # The active model name running in Ollama
-VLM_MODEL_NAME = "llava:7b"
+VLM_MODEL_IMAGE = "llava:7b"
+VLM_MODEL_TEXT =  "ibm/granite4.1:8b"
 
 # The local Ollama server address
 OLLAMA_API_BASE_URL = "http://localhost:11434"
