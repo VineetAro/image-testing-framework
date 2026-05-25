@@ -13,7 +13,7 @@ checker = ResponseChecker()
 
 
 @pytest.mark.parametrize("question, keywords, test_name", CORE_TEXT_TEST_CASES)
-def test_problem_detection(question, keywords, test_name, vlm_client,request):
+def test_text_detection(question, keywords, test_name, vlm_client,request):
 
 
     # Execute inference
@@ -35,9 +35,12 @@ def test_problem_detection(question, keywords, test_name, vlm_client,request):
     regression_warning = checker.check_regression(test_name, status, duration, HISTORIC_BASELINES)
     request.node.regression_warning = regression_warning
 
+    #Capture response
+    request.node.response_data = f'Description: {response_data.get("Description", "" )}, Probability: {response_data.get("Probability", 0.0 )}'
+
     #Assertions (If these fail, conftest logs them as FAIL)
-    assert score is True, f"Confidence score too low. Model output: {response_data}"
-    assert found is True, f"Expected keywords not found. Model output: {response_data}"
+    assert score is True, f'Confidence score too low. Model output: {response_data}'
+    assert found is True, f'Expected keywords not found. Model output: {response_data}'
 
 
 

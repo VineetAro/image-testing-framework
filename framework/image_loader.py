@@ -73,7 +73,7 @@ class ImageLoader:
         output_image = str(self.image_dir / f"compressed_{name}{ext}")
 
         # Save with compression using the correct dynamic output_image variable
-        if ext.upper == "PNG":
+        if ext.upper() == "PNG":
             img.save(output_image, "PNG", optimize=True)
         else:
             img.save(output_image, optimize=True, quality=20,  format="JPEG")

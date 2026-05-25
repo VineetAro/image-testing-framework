@@ -2,6 +2,7 @@ import pytest
 from framework.reporter import TestReporter
 from framework.client import OllamaClient
 from config import settings
+import gc
 
 
 @pytest.fixture(scope="function")  # Changed to function scope to re-evaluate per test case
@@ -9,18 +10,29 @@ def vlm_client(request):
     """
     Dynamically routes to the correct Ollama model based on the test case parameters.
     """
+    # Look at the filename currently executing (e.g., vision_test.py or text_test.py)
+    test_file = request.node.fspath.basename if hasattr(request.node, "fspath") else ""
+
     # Check if 'image_file' is in the test's parametrized arguments
-    if hasattr(request, "callspec") and "image_file" in request.callspec.params:
-        # It's a vision test case
-        model_name = settings.VLM_MODEL_IMAGE
+    if "vision" in test_file.lower():
+        model_name = settings.VLM_MODEL_IMAGE  # Routes to "llava:7b"
     else:
-        # It's a pure text test case
-        # Fallback to text model if defined in settings, otherwise reuse VLM
-        model_name = settings.VLM_MODEL_TEXT
+        model_name = settings.VLM_MODEL_TEXT  # Routes to "ibm/granite4.1:8b"
 
     # Instantiate the client with the dynamically selected model
     client = OllamaClient(model=model_name)
     yield client
+
+    # 🧼 Teardown Phase: Clear VRAM right after the test function finishes
+    gc.collect()
+    try:
+        requests.post(
+            f"{settings.OLLAMA_API_BASE_URL}/api/generate",
+            json={"model": model_name, "keep_alive": 0},
+            timeout=5
+        )
+    except Exception:
+        pass
 
 @pytest.fixture(scope="session", autouse=True)
 def reporter_manager():
@@ -49,12 +61,12 @@ def pytest_runtest_makereport(item, call):
         # Pull parameters dynamically out of Pytest's internal memory
         image_name = item.callspec.params.get("image_file", "Unknown") if hasattr(item, 'callspec') else "Unknown"
         reg_warn = getattr(item, "regression_warning", "")
-
+        resp_data = getattr(item, "response_data", "No response data captured")
         if report.passed:
             pytest.shared_reporter.record_result(
                 test_name=test_name, total_time=duration, status="PASS",
                 image_name=image_name, details="Passed confidence and keyword thresholds.",
-                regression_warning=reg_warn
+                regression_warning=reg_warn,response=resp_data
             )
         elif report.failed:
             # Extract the failure message without crashing the framework
@@ -62,5 +74,6 @@ def pytest_runtest_makereport(item, call):
             pytest.shared_reporter.record_result(
                 test_name=test_name, total_time=duration, status="FAIL",
                 image_name=image_name, details=error_msg,
-                regression_warning=reg_warn
+                regression_warning=reg_warn,
+                response=resp_data
             )

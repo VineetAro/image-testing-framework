@@ -11,9 +11,11 @@ from config import settings
 
 
 class OllamaClient:
+
     def __init__(self, model:str):
         self.base_url = settings.OLLAMA_API_BASE_URL
-        self.model = settings.VLM_MODEL_NAME
+        self.model = model
+        print (f'MODEL LOADED: {self.model}')
 
     def get_model(self):
         return self.model
@@ -22,6 +24,7 @@ class OllamaClient:
 
         payload = {
             "model": self.model,  # Use the stored model name
+            "format": "json",
             "prompt": (
                 f"{question}\n\n"
                 'Return ONLY valid JSON in this exact format:\n'
@@ -66,6 +69,7 @@ class OllamaClient:
         # print("Granite Launched")
         payload = {
             "model": self.model,  # Use the stored model name
+            "format": "json",
             "prompt": (
 
                 f"{question}\n\n"

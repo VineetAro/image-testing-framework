@@ -9,7 +9,7 @@ class TestReporter:
         self.results = []
         self.report_path = settings.REPORT_PATH
 
-    def record_result(self, test_name, total_time : float , status, image_name, details, regression_warning):
+    def record_result(self, test_name, total_time : float , status, image_name, details, regression_warning, response: str):
         """
         Records the outcome of a single test.
         """
@@ -20,7 +20,8 @@ class TestReporter:
             "status": status,
             "image_name": image_name,
             "details": details,
-            "regression_warning": regression_warning
+            "regression_warning": regression_warning,
+            "response": response
         })
 
     def generate_markdown(self):
@@ -55,5 +56,6 @@ class TestReporter:
                 f.write(f" - **Total Time:** {r['total_time']:.2f} Seconds\n")
                 f.write(f"- **Image:** `{r['image_name']}`\n")
                 f.write(f"- **Details:** {r['details']}\n\n")
+                f.write(f"- **Response:** {r['response']}\n\n")
                 f.write(f"- **Regression Warning:** {r['regression_warning']}\n\n")
 

@@ -12,7 +12,7 @@ CORE_VISION_TEST_CASES_OBJECTS= [("running_fire_hydrant.png", "What is in this i
          "Image Detection")]
 
 CORE_TEXT_TEST_CASES= [
-    ("Was bedeutet 'Fire Hydrant' auf deutsch?", ["Wasser", "Feuer", "Feuerlöscher"], "test_fire_hydrant"),
+    ("Was bedeutet 'Fire Hydrant' auf deutsch?", ["Wasser", "Feuer", "Feuerlöscher", "Feuerlöschbrunnen", "Hydrant"], "test_fire_hydrant"),
     ("Was bedeutet 'Speed Limit' auf deutsch?", ["Schnell", "Fahren", "Geschwindigkeitsbegrenzung"], "test_speed_limit"),
     ("Was bedeutet 'Emergency Exit' auf deutsch?", ["Gebäuden", "Ausgang", "Notausgang"], "test_emergency_exit")
 ]
